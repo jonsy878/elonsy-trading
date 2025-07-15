@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elonsy Trading - Checkout</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      color: #333;
+    }
+    header {
+      background-color: #388e3c;
+      color: #fff;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .menu-toggle {
+      display: none;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+    .hero {
+      background-color: #0077b6;
+      padding: 40px 20px;
+      text-align: center;
+      color: white;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+    .checkout-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .cart-summary {
+      margin-bottom: 20px;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #ddd;
+      padding: 8px 0;
+    }
+    .cart-total {
+      text-align: right;
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    form {
+      margin-top: 20px;
+    }
+    form input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+    form button {
+      background: #388e3c;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 1em;
+    }
+    form button:hover {
+      background: #2c6a2c;
+    }
+    .bank-details {
+      margin-top: 20px;
+      background: #fff6a7;
+      padding: 15px;
+      border-radius: 4px;
+      display: none;
+    }
+    .bank-details h3 {
+      margin-top: 0;
+      color: #388e3c;
+    }
+    .cart-count {
+      background: #fdd835;
+      color: #333;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.9em;
+      margin-left: 6px;
+    }
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #388e3c;
+      color: white;
+      text-align: center;
+      border-radius: 4px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1000;
+      left: 50%;
+      bottom: 30px;
+      font-size: 1em;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      font-size: 0.9em;
+    }
+    @media (max-width: 600px) {
+      nav {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+      }
+      nav.active {
+        display: flex;
+      }
+      .menu-toggle {
+        display: block;
+      }
+    }
+  </style>
+   <script>
+function placeOrder() {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+
+  if (!name || !email || !phone) {
+    showToast('Please fill in all details.');
+    return;
+  }
+
+  // Prepare cart info
+  let stored = localStorage.getItem('cart');
+  let cart = stored ? JSON.parse(stored) : [];
+  if (cart.length === 0) {
+    showToast('Your cart is empty.');
+    return;
+  }
+
+  const items = cart.map(item => item.name);
+  const totalAmount = cart.reduce((sum, item) => sum + item.price, 0);
+
+  // Prepare data to send
+  const orderData = {
+    customerName: name,
+    email: email,
+    phone: phone,
+    items: items,
+    totalAmount: totalAmount
+  };
+
+  // Send to backend
+  fetch('http://localhost:8080/api/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(orderData)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Network error");
+    return res.json();
+  })
+  .then(data => {
+    showToast('Order placed and saved!');
+
+    // Show bank details
+    document.getElementById('bank-details').style.display = 'block';
+
+    // Clear cart
+    localStorage.removeItem('cart');
+    updateCartCount();
+    renderCart();
+
+    // Reset form
+    document.getElementById('checkout-form').reset();
+  })
+  .catch(err => {
+    console.error('Order submission failed:', err);
+    showToast('Failed to save order. Please try again.');
+  });
+}
+</script>
+
+</head>
+<body>
+  <header>
+    <div class="logo">Elonsy Trading</div>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <nav>
+      <a href="homepage.html">Home</a>
+      <a href="product-listing.html">Products</a>
+      <a href="shopping-cart.html">Cart <span id="cart-count" class="cart-count">0</span></a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Checkout</h1>
+  </section>
+
+  <div class="checkout-container">
+    <div class="cart-summary" id="cart-summary"></div>
+    <div class="cart-total" id="cart-total"></div>
+
+    <form id="checkout-form" onsubmit="event.preventDefault(); placeOrder();">
+      <input type="text" id="name" placeholder="Full Name" />
+      <input type="email" id="email" placeholder="Email Address" />
+      <input type="tel" id="phone" placeholder="Phone Number" />
+      <button type="submit">Place Order</button>
+    </form>
+
+    <div class="bank-details" id="bank-details">
+      <h3>Bank Deposit Instructions</h3>
+      <p><strong>Bank Name:</strong> National Bank of Commerce</p>
+      <p><strong>Account Name:</strong> Elonsy Trading</p>
+      <p><strong>Account Number:</strong> 123456789</p>
+      <p><strong>Branch:</strong> Port Moresby</p>
+      <p><strong>SWIFT Code:</strong> NBOCPGPG</p>
+      <p>Please include your name in the payment reference.</p>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 Elonsy Trading. All rights reserved.<br />
+    WhatsApp: +1234567890
+  </footer>
+
+  <div id="toast"></div>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elonsy Trading - Shopping Cart</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      color: #333;
+    }
+    header {
+      background-color: #388e3c;
+      color: #fff;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .menu-toggle {
+      display: none;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+    .hero {
+      background-color: #0077b6;
+      padding: 40px 20px;
+      text-align: center;
+      color: white;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+    .cart-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+    .cart-item-name {
+      font-weight: bold;
+    }
+    .cart-item-remove {
+      background: #c62828;
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .cart-total {
+      text-align: right;
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .checkout-button, .clear-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+    }
+    .checkout-button {
+      background: #388e3c;
+      color: #fff;
+    }
+    .checkout-button:hover {
+      background: #2c6a2c;
+    }
+    .clear-button {
+      background: #c62828;
+      color: #fff;
+      margin-left: 10px;
+    }
+    .cart-count {
+      background: #fdd835;
+      color: #333;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.9em;
+      margin-left: 6px;
+    }
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #388e3c;
+      color: white;
+      text-align: center;
+      border-radius: 4px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1000;
+      left: 50%;
+      bottom: 30px;
+      font-size: 1em;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      font-size: 0.9em;
+    }
+    @media (max-width: 600px) {
+      nav {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+      }
+      nav.active {
+        display: flex;
+      }
+      .menu-toggle {
+        display: block;
+      }
+    }
+  </style>
+  <script>
+    let cart = [];
+
+    function toggleMenu() {
+      const nav = document.querySelector('nav');
+      nav.classList.toggle('active');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'show';
+      setTimeout(() => {
+        toast.className = toast.className.replace('show', '');
+      }, 2500);
+    }
+
+    function updateCartCount() {
+      const countElem = document.getElementById('cart-count');
+      countElem.textContent = cart.length;
+    }
+
+    function saveCart() {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    function loadCart() {
+      const stored = localStorage.getItem('cart');
+      if (stored) {
+        cart = JSON.parse(stored);
+      }
+    }
+
+    function removeItem(index) {
+      const removed = cart.splice(index, 1);
+      saveCart();
+      renderCart();
+      updateCartCount();
+      showToast(`${removed[0].name} removed`);
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items');
+      container.innerHTML = '';
+      let total = 0;
+
+      if (cart.length === 0) {
+        container.innerHTML = '<p>Your cart is empty.</p>';
+        document.getElementById('cart-total').textContent = '';
+        return;
+      }
+
+      cart.forEach((item, index) => {
+        total += item.price;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <span class="cart-item-name">${item.name}</span>
+          <span>$${item.price.toFixed(2)}</span>
+          <button class="cart-item-remove" onclick="removeItem(${index})">Remove</button>
+        `;
+        container.appendChild(div);
+      });
+
+      document.getElementById('cart-total').textContent = `Total: $${total.toFixed(2)}`;
+    }
+
+    function clearCart() {
+      cart = [];
+      saveCart();
+      renderCart();
+      updateCartCount();
+      showToast('Cart cleared');
+    }
+
+    window.onload = () => {
+      loadCart();
+      updateCartCount();
+      renderCart();
+    };
+  </script>
+</head>
+<body>
+  <header>
+    <div class="logo">Elonsy Trading</div>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <nav>
+      <a href="homepage.html">Home</a>
+      <a href="product-listing.html">Products</a>
+      <a href="shopping-cart.html">Cart <span id="cart-count" class="cart-count">0</span></a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Your Shopping Cart</h1>
+  </section>
+
+  <div class="cart-container">
+    <div id="cart-items"></div>
+    <div class="cart-total" id="cart-total"></div>
+    <button class="checkout-button" onclick="location.href='checkout.html'">Proceed to Checkout</button>
+    <button class="clear-button" onclick="clearCart()">Clear Cart</button>
+  </div>
+
+  <footer>
+    &copy; 2025 Elonsy Trading. All rights reserved.<br />
+    WhatsApp: +1234567890
+  </footer>
+
+  <div id="toast"></div>
+</body>
+</html>

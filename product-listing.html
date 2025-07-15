@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elonsy Trading - Products</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      color: #333;
+    }
+    header {
+      background-color: #388e3c;
+      color: #fff;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .menu-toggle {
+      display: none;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+    .hero {
+      background-color: #0077b6;
+      padding: 40px 20px;
+      text-align: center;
+      color: white;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+    .products {
+      background-color: #fff6a7;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .product-card {
+      background: #fff;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    .product-card img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    .product-card h3 {
+      margin: 10px 0 5px;
+      font-size: 1.1em;
+      color: #388e3c;
+    }
+    .product-card p {
+      margin: 0 0 10px;
+      font-weight: bold;
+      color: #555;
+    }
+    .product-card button {
+      background: #388e3c;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    .product-card button:hover {
+      background: #2c6a2c;
+    }
+    .cart-count {
+      background: #fdd835;
+      color: #333;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.9em;
+      margin-left: 6px;
+    }
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #388e3c;
+      color: white;
+      text-align: center;
+      border-radius: 4px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1000;
+      left: 50%;
+      bottom: 30px;
+      font-size: 1em;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      font-size: 0.9em;
+    }
+    @media (max-width: 600px) {
+      nav {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+      }
+      nav.active {
+        display: flex;
+      }
+      .menu-toggle {
+        display: block;
+      }
+    }
+  </style>
+  <script>
+    let cart = [];
+
+    function toggleMenu() {
+      const nav = document.querySelector('nav');
+      nav.classList.toggle('active');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'show';
+      setTimeout(() => {
+        toast.className = toast.className.replace('show', '');
+      }, 2500);
+    }
+
+    function updateCartCount() {
+      const countElem = document.getElementById('cart-count');
+      countElem.textContent = cart.length;
+    }
+
+    function loadCart() {
+      const stored = localStorage.getItem('cart');
+      if (stored) {
+        cart = JSON.parse(stored);
+      }
+    }
+
+    function addToCart(productName, price) {
+      cart.push({ name: productName, price: price });
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+      showToast(`${productName} added to cart!`);
+    }
+
+    window.onload = () => {
+      loadCart();
+      updateCartCount();
+    };
+  </script>
+</head>
+<body>
+  <header>
+    <div class="logo">Elonsy Trading</div>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <nav>
+      <a href="homepage.html">Home</a>
+      <a href="product-listing.html">Products</a>
+      <a href="shopping-cart.html">Cart <span id="cart-count" class="cart-count">0</span></a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>All Products</h1>
+  </section>
+
+  <section class="products">
+    <div class="product-card">
+      <a href="product-detail.html"><img src="https://via.placeholder.com/220x150?text=Samsung+Galaxy+S21" alt="Samsung Galaxy S21"></a>
+      <h3>Samsung Galaxy S21</h3>
+      <p>$799.99</p>
+      <button onclick="addToCart('Samsung Galaxy S21', 799.99)">Add to Cart</button>
+    </div>
+    <div class="product-card">
+      <a href="product-detail.html"><img src="https://via.placeholder.com/220x150?text=Dragonhawk+Tattoo+Machine" alt="Dragonhawk Tattoo Machine"></a>
+      <h3>Dragonhawk Tattoo Machine</h3>
+      <p>$129.99</p>
+      <button onclick="addToCart('Dragonhawk Tattoo Machine', 129.99)">Add to Cart</button>
+    </div>
+    <div class="product-card">
+      <a href="product-detail.html"><img src="https://via.placeholder.com/220x150?text=Portable+Boombox" alt="Portable Boombox"></a>
+      <h3>Portable Bluetooth Boombox</h3>
+      <p>$59.99</p>
+      <button onclick="addToCart('Portable Bluetooth Boombox', 59.99)">Add to Cart</button>
+    </div>
+    <div class="product-card">
+      <a href="product-detail.html"><img src="https://via.placeholder.com/220x150?text=Wireless+Earbuds" alt="Wireless Earbuds"></a>
+      <h3>Wireless Earbuds</h3>
+      <p>$39.99</p>
+      <button onclick="addToCart('Wireless Earbuds', 39.99)">Add to Cart</button>
+    </div>
+    <div class="product-card">
+      <a href="product-detail.html"><img src="https://via.placeholder.com/220x150?text=Power+Bank" alt="Power Bank"></a>
+      <h3>Power Bank 10,000mAh</h3>
+      <p>$24.99</p>
+      <button onclick="addToCart('Power Bank 10,000mAh', 24.99)">Add to Cart</button>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2025 Elonsy Trading. All rights reserved.<br />
+    WhatsApp: +1234567890
+  </footer>
+
+  <div id="toast"></div>
+</body>
+</html>
